@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uzay Görevi | 7. Sınıf Fen Bilimleri</title>
+<style>
+:root{
+  --bg:#04060c;
+  --bg2:#080d18;
+  --panel:#0c1322;
+  --panel2:#101a2e;
+  --line:#22314f;
+  --line-bright:#3a5480;
+  --text:#e7edf9;
+  --dim:#8ea0c4;
+  --cyan:#4fd6ff;
+  --cyan-dim:#1f7fa3;
+  --green:#3ddc84;
+  --amber:#ffb020;
+  --red:#ff5470;
+  --gold:#ffd54a;
+  --silver:#c9d3e0;
+  --bronze:#e0925a;
+  --mono:'Consolas','SFMono-Regular','Menlo','Courier New',monospace;
+  --sans:'Segoe UI','Trebuchet MS',system-ui,-apple-system,sans-serif;
+  --shadow:0 12px 34px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(79,214,255,.08), transparent 45%),
+    radial-gradient(ellipse at 85% 100%, rgba(61,220,132,.06), transparent 45%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 1px, transparent 1px, transparent 3px),
+    linear-gradient(180deg, var(--bg), var(--bg2));
+  color:var(--text);
+  font-family:var(--sans);
+  position:relative;
+}
+h1,h2,h3,.mono{font-family:var(--mono);}
+.app{max-width:1080px; margin:0 auto; padding:16px 16px 60px;}
+
+/* ---------- Header / progress rail ---------- */
+header.top{text-align:center; padding:10px 6px 4px;}
+header.top h1{
+  font-size:clamp(18px,3.4vw,28px); margin:0 0 4px; letter-spacing:1px;
+  color:var(--cyan); text-shadow:0 0 18px rgba(79,214,255,.45);
+}
+header.top p{color:var(--dim); margin:0; font-size:12.5px; letter-spacing:.5px; font-family:var(--mono);}
+
+.rail-wrap{margin:22px 0 26px; overflow-x:auto; padding-bottom:4px;}
+.rail{display:flex; align-items:flex-start; gap:0; min-width:640px; position:relative;}
+.rail-node{flex:1; display:flex; flex-direction:column; align-items:center; position:relative; cursor:pointer;}
+.rail-node.disabled{cursor:not-allowed;}
+.rail-line{position:absolute; top:19px; left:-50%; width:100%; height:2px; background:var(--line); z-index:0;}
+.rail-node:first-child .rail-line{display:none;}
+.rail-line.done{background:var(--green);}
+.rail-dot{
+  width:38px; height:38px; border-radius:50%; background:var(--panel2); border:2px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:16px; z-index:1; transition:.2s;
+}
+.rail-node.current .rail-dot{border-color:var(--cyan); box-shadow:0 0 0 4px rgba(79,214,255,.18), 0 0 16px rgba(79,214,255,.5); animation:railPulse 2s ease-in-out infinite;}
+.rail-node.done .rail-dot{border-color:var(--green); background:rgba(61,220,132,.12);}
+.rail-node.disabled .rail-dot{opacity:.4;}
+@keyframes railPulse{0%,100%{box-shadow:0 0 0 4px rgba(79,214,255,.18), 0 0 14px rgba(79,214,255,.4);} 50%{box-shadow:0 0 0 7px rgba(79,214,255,.1), 0 0 22px rgba(79,214,255,.7);}}
+.rail-label{font-size:10px; color:var(--dim); margin-top:6px; text-align:center; font-family:var(--mono); letter-spacing:.3px; max-width:74px;}
+.rail-node.current .rail-label{color:var(--cyan);}
+.rail-node.done .rail-label{color:var(--green);}
+
+/* ---------- Panels / cards ---------- */
+.panel{
+  background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line);
+  border-radius:6px; box-shadow:var(--shadow); padding:20px; position:relative; margin-bottom:16px;
+}
+.panel::before, .panel::after{
+  content:''; position:absolute; width:14px; height:14px; border:2px solid var(--cyan-dim); opacity:.7;
+}
+.panel::before{top:-1px; left:-1px; border-right:none; border-bottom:none;}
+.panel::after{bottom:-1px; right:-1px; border-left:none; border-top:none;}
+.eyebrow{font-family:var(--mono); font-size:11px; color:var(--cyan); letter-spacing:2px; text-transform:uppercase; margin:0 0 6px;}
+.stage-title{font-size:21px; font-weight:800; margin:0 0 10px; display:flex; align-items:center; gap:9px;}
+.stage-lead{color:var(--dim); font-size:14px; line-height:1.6; margin:0 0 18px;}
+
+.card-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-bottom:16px;}
+.info-card{
+  background:rgba(255,255,255,.02); border:1px solid var(--line); border-radius:8px; padding:14px;
+  cursor:pointer; transition:.18s;
+}
+.info-card:hover{border-color:var(--cyan-dim); transform:translateY(-2px);}
+.info-card .ic-emoji{font-size:26px; margin-bottom:6px; display:block;}
+.info-card .ic-name{font-weight:800; font-size:14.5px; margin-bottom:4px;}
+.info-card .ic-def{font-size:12.5px; color:var(--dim); line-height:1.5;}
+.info-card .ic-date{font-family:var(--mono); font-size:11px; color:var(--amber); margin-bottom:4px;}
+
+.btn{
+  font-family:var(--mono); background:linear-gradient(90deg,var(--cyan),#8fe8ff); color:#03131c; border:none;
+  padding:11px 22px; border-radius:5px; font-weight:800; font-size:13px; letter-spacing:1px; text-transform:uppercase;
+  cursor:pointer; box-shadow:0 4px 16px rgba(79,214,255,.3); transition:.15s;
+}
+.btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+.btn:disabled{opacity:.4; cursor:not-allowed; transform:none;}
+.btn.secondary{background:var(--panel2); color:var(--text); border:1px solid var(--line-bright); box-shadow:none;}
+.btn.ghost{background:transparent; color:var(--dim); border:1px solid var(--line);}
+.btn-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:18px;}
+
+/* ---------- Modal ---------- */
+.modal-overlay{position:fixed; inset:0; background:rgba(2,4,10,.75); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:200; padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-card{background:linear-gradient(180deg,var(--panel2),var(--panel)); border:1px solid var(--line-bright); border-radius:8px; max-width:440px; width:100%; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,.6); position:relative;}
+.modal-close{position:absolute; top:12px; right:14px; background:none; border:none; color:var(--dim); font-size:22px; cursor:pointer;}
+.modal-close:hover{color:var(--text);}
+.modal-title{font-size:19px; font-weight:800; margin:0 0 10px; display:flex; align-items:center; gap:8px;}
+.modal-list{list-style:none; margin:0; padding:0; display:grid; gap:6px;}
+.modal-list li{background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:6px; padding:8px 10px; font-size:13px;}
+.modal-list li::before{content:'▹ '; color:var(--cyan);}
+
+/* ---------- Challenge ---------- */
+.challenge-box{background:rgba(79,214,255,.05); border:1px solid var(--cyan-dim); border-radius:8px; padding:18px; margin-top:8px;}
+.challenge-progress{font-family:var(--mono); font-size:12px; color:var(--dim); margin-bottom:10px; text-align:right;}
+.challenge-q{font-size:15px; font-weight:700; margin-bottom:14px; line-height:1.5;}
+.opt-list{display:grid; gap:9px;}
+.opt-btn{
+  text-align:left; background:var(--panel2); border:2px solid var(--line); color:var(--text); padding:12px 15px;
+  border-radius:6px; cursor:pointer; font-size:13.5px; font-weight:600; transition:.15s;
+}
+.opt-btn:hover:not(:disabled){border-color:var(--cyan);}
+.opt-btn.correct{border-color:var(--green); background:rgba(61,220,132,.12); color:var(--green);}
+.opt-btn.wrong{border-color:var(--red); background:rgba(255,84,112,.12); color:var(--red);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.multi.picked{border-color:var(--cyan); background:rgba(79,214,255,.1);}
+.opt-btn.missed{border-color:var(--amber); background:rgba(255,176,32,.08); color:var(--amber);}
+
+/* ---------- Sat classify (drag-drop) ---------- */
+.pool{display:flex; flex-wrap:wrap; gap:10px; min-height:56px; padding:12px; border:1px dashed var(--line); border-radius:8px; margin-bottom:14px; transition:.15s;}
+.pool.drag-over{border-color:var(--cyan); background:rgba(79,214,255,.06);}
+.chip{
+  display:flex; align-items:center; gap:7px; background:var(--panel2); border:2px solid var(--line);
+  padding:8px 13px; border-radius:6px; cursor:grab; font-weight:700; font-size:13px; font-family:var(--mono);
+  touch-action:none; user-select:none; transition:border-color .15s, opacity .15s;
+}
+.chip.dragging{opacity:.3;}
+.chip.correct{border-color:var(--green); color:var(--green);}
+.chip.wrong{border-color:var(--red); color:var(--red);}
+.drag-ghost{position:fixed; top:0; left:0; z-index:300; pointer-events:none; cursor:grabbing; transform:translate(-50%,-50%) scale(1.08); box-shadow:0 10px 26px rgba(0,0,0,.55); border-color:var(--cyan);}
+.dropzones{display:flex; gap:14px; flex-wrap:wrap;}
+.dropzone{flex:1; min-width:220px; min-height:120px; border:2px dashed var(--line); border-radius:8px; padding:12px; transition:.15s;}
+.dropzone.drag-over{border-color:var(--cyan); background:rgba(79,214,255,.06);}
+.dropzone h4{margin:0 0 10px; font-size:13px; text-align:center; font-family:var(--mono); letter-spacing:.5px;}
+.zone-body{display:flex; flex-wrap:wrap; gap:8px; min-height:56px;}
+
+.feedback-banner{text-align:center; font-weight:700; padding:11px; border-radius:6px; margin-top:14px; display:none; font-size:13.5px;}
+.feedback-banner.show{display:block;}
+.feedback-banner.good{background:rgba(61,220,132,.12); color:var(--green); border:1px solid rgba(61,220,132,.3);}
+.feedback-banner.bad{background:rgba(255,176,32,.1); color:var(--amber); border:1px solid rgba(255,176,32,.3);}
+
+/* ---------- Badge rail label extra ---------- */
+.stage-badge-earn{display:flex; align-items:center; gap:10px; justify-content:center; background:rgba(61,220,132,.08); border:1px solid rgba(61,220,132,.3); border-radius:8px; padding:14px; margin-top:16px; font-family:var(--mono); font-size:13px; color:var(--green);}
+.stage-badge-earn .big-emoji{font-size:30px;}
+
+/* ---------- Aside note ---------- */
+.aside-note{background:rgba(255,176,32,.06); border:1px solid rgba(255,176,32,.25); border-radius:8px; padding:14px 16px; margin-top:14px; font-size:13px; color:var(--text); line-height:1.6;}
+.aside-note .an-title{font-family:var(--mono); color:var(--amber); font-weight:700; margin-bottom:6px; letter-spacing:.5px;}
+
+/* ---------- Certificate ---------- */
+.cert-wrap{text-align:center;}
+.cert-input{
+  font-family:var(--sans); font-size:15px; padding:10px 14px; border-radius:6px; border:2px solid var(--line-bright);
+  background:var(--panel2); color:var(--text); width:280px; max-width:80%; text-align:center; margin:6px 0 18px;
+}
+.cert-input:focus{outline:none; border-color:var(--cyan);}
+.certificate{
+  border:3px solid var(--cyan); border-radius:10px; padding:34px 24px; background:radial-gradient(ellipse at 50% 0%, rgba(79,214,255,.1), transparent 60%), var(--panel);
+  margin:0 auto; max-width:560px;
+}
+.certificate .cert-eyebrow{font-family:var(--mono); color:var(--cyan); letter-spacing:3px; font-size:12px;}
+.certificate h2{font-size:24px; margin:10px 0; color:var(--text);}
+.certificate .cert-name{font-size:28px; font-weight:900; color:var(--amber); margin:14px 0; font-family:var(--sans); text-shadow:0 0 20px rgba(255,176,32,.4);}
+.certificate .cert-line{color:var(--dim); font-size:13.5px; line-height:1.7;}
+.badge-row{display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin:20px 0;}
+.badge-pill{display:flex; flex-direction:column; align-items:center; gap:3px; font-family:var(--mono); font-size:10px; color:var(--dim); border:1px solid var(--line); border-radius:10px; padding:12px 14px 10px; min-width:104px; background:rgba(255,255,255,.02);}
+.badge-pill .bp-emoji{font-size:24px;}
+.badge-pill .bp-name{color:var(--text); font-family:var(--sans); font-size:11px; font-weight:600; text-align:center; margin-top:1px;}
+.badge-pill .bp-tier{font-size:9.5px; letter-spacing:.5px; margin-top:3px; padding:2px 7px; border-radius:20px; border:1px solid currentColor;}
+.badge-pill .bp-score{font-size:9.5px; color:var(--dim); margin-top:2px;}
+.badge-pill.tier-gold{border-color:rgba(255,213,74,.4); box-shadow:0 0 14px rgba(255,213,74,.12);}
+.badge-pill.tier-gold .bp-tier{color:var(--gold);}
+.badge-pill.tier-silver{border-color:rgba(201,211,224,.35);}
+.badge-pill.tier-silver .bp-tier{color:var(--silver);}
+.badge-pill.tier-bronze{border-color:rgba(224,146,90,.35);}
+.badge-pill.tier-bronze .bp-tier{color:var(--bronze);}
+.badge-pill.tier-none .bp-tier{color:var(--dim); border-style:dashed;}
+.badge-pill.tier-needs{border-color:rgba(255,84,112,.4);}
+.badge-pill.tier-needs .bp-tier{color:var(--red);}
+.cert-score{font-family:var(--mono); font-size:15px; color:var(--green); margin-top:10px;}
+.cert-tier-note{font-family:var(--sans); font-size:11.5px; color:var(--dim); margin-top:14px; max-width:560px; margin-left:auto; margin-right:auto;}
+.certificate.not-passed{border-color:var(--amber); box-shadow:none;}
+.certificate.not-passed .cert-eyebrow{color:var(--amber);}
+.certificate.not-passed .cert-score{color:var(--amber);}
+
+footer.bottom{text-align:center; color:var(--dim); font-size:11px; margin-top:30px; opacity:.6; font-family:var(--mono);}
+
+@media print{
+  header.top, .rail-wrap, footer.bottom, .btn-row, .no-print{display:none !important;}
+  body{background:#fff; color:#000;}
+  .certificate{border-color:#000;}
+}
+@media (max-width:560px){
+  .card-grid{grid-template-columns:1fr 1fr;}
+  .rail-label{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>🛰️ UZAY GÖREVİ</h1>
+    <p>TÜRKİYE UZAY AJANSI · GÖREV UZMANI ADAYLIĞI PROGRAMI</p>
+  </header>
+
+  <div class="rail-wrap">
+    <div class="rail" id="rail"></div>
+  </div>
+
+  <main id="stage-root"></main>
+
+  <footer class="bottom">7. Sınıf Fen Bilimleri · Uzay Araştırmaları · Kaynak: MEB ders kitabı ve TYMM öğretim programı</footer>
+</div>
+
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal-card" id="modal-card"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------
+// GÖREV VERİLERİ — 7. Sınıf Fen Bilimleri, "Uzay Araştırmaları"
+// Kaynak: MEB ders kitabı "1. Bölüm: Türkiye ve Uzay Araştırmaları"
+// ve TYMM resmi öğretim programı (FB.7.1.1 - FB.7.1.3)
+// ---------------------------------------------------------
+
+const VEHICLES = [
+  {
+    id: 'sonda', name: 'Uzay Sondası', emoji: '📡',
+    def: 'Bir gök cismini veya uzayda meydana gelen olayları incelemek üzere gönderilen, Dünya\'dan kontrol edilebilen robotik uzay aracıdır.',
+    facts: ['Dünya\'dan uzaktan kontrol edilir', 'İçinde insan bulunmaz', 'Enerjisini güneş panellerinden sağlar', 'Keşif ve gözlem amaçlıdır']
+  },
+  {
+    id: 'roket', name: 'Uzay Roketi', emoji: '🚀',
+    def: 'Uzay araçlarını Dünya\'nın güçlü çekim kuvveti etkisinden çıkararak uzaya taşıyan, yakıt, motor ve egzozdan oluşan silindir şeklindeki araçlardır.',
+    facts: ['Diğer tüm uzay araçlarını uzaya taşır', 'Dünya\'dan kontrol edilebilir', 'Eskiden tek kullanımlıktı, artık yeniden kullanılabiliyor', 'Haberleşme veya iletişim amaçlı değildir']
+  },
+  {
+    id: 'uydu', name: 'Yapay Uydu', emoji: '🛰️',
+    def: 'Dünya\'nın veya başka gök cisimlerinin çevresini belirli bir yörüngede dolanan araçlardır.',
+    facts: ['İletişim, gözlem, keşif amaçlı kullanılır', 'Dünya\'dan kontrol edilir', 'Enerjisini güneş panellerinden sağlar', 'Astronot taşımaz']
+  },
+  {
+    id: 'mekik', name: 'Uzay Mekiği', emoji: '🛸',
+    def: 'Yeniden kullanılabilme özelliği olan; büyük uyduları, astronotları ve gerekli malzemeleri uzay istasyonuna taşıyan uzay aracıdır.',
+    facts: ['Yeniden kullanılabilir', 'İçindeki astronotlar tarafından kontrol edilir', 'Astronot ve malzeme taşır', 'Uzay istasyonuna gidiş-geliş yapar']
+  },
+  {
+    id: 'istasyon', name: 'Uzay İstasyonu', emoji: '🧑‍🚀',
+    def: 'Belirli bir yörüngede hareket eden, içinde astronotların araştırma yapabileceği donanım ve yaşam alanına sahip uzay aracıdır.',
+    facts: ['Düşük yer çekimli ortamda bilimsel deney yapılır', 'Enerjisini güneş panellerinden alır', 'İstasyonda görevli uzman personel tarafından kontrol edilir', 'Yeniden kullanılabilir DEĞİLDİR — bakım/onarımla ömrü uzatılır']
+  },
+  {
+    id: 'teleskop', name: 'Teleskop', emoji: '🔭',
+    def: 'Gök cisimlerini gözlemlemek için kullanılan araçlardır. Yer tabanlı veya uzay tabanlı (Dünya yörüngesine yerleştirilmiş) olabilir.',
+    facts: ['Gök cisimlerini gözlemlemek için kullanılır', 'Yer tabanlı ve uzay tabanlı olmak üzere ikiye ayrılır', 'Uzay teleskopları atmosferden etkilenmez, daha net görüntü verir', 'Astronot veya malzeme taşımaz']
+  }
+];
+
+// Sahne 1 meydan okuması: senaryo -> doğru araç id
+const VEHICLE_CHALLENGE = [
+  { scenario: 'Bir gök cismini yakından incelemek istiyorsun ama içine insan göndermeden, Dünya\'dan kontrol etmek istiyorsun. Hangi aracı seçersin?', options: ['sonda', 'mekik', 'istasyon'] },
+  { scenario: 'Astronotları ve gerekli malzemeleri uzay istasyonuna taşıyacak, göreve tamamlayınca geri dönebilen bir araca ihtiyacın var.', options: ['mekik', 'roket', 'uydu'] },
+  { scenario: 'Dünya\'nın yörüngesinde dolanarak ülke için haberleşme sağlayacak bir araca ihtiyacın var.', options: ['uydu', 'sonda', 'teleskop'] },
+  { scenario: 'Astronotların düşük yer çekimli bir ortamda uzun süreli bilimsel deneyler yapabileceği bir yaşam alanına ihtiyacın var.', options: ['istasyon', 'mekik', 'roket'] },
+  { scenario: 'Uzay araçlarını Dünya\'nın çekim kuvvetinden kurtarıp uzaya fırlatacak bir araca ihtiyacın var.', options: ['roket', 'uydu', 'teleskop'] },
+  { scenario: 'Atmosferin engellemesi olmadan çok daha net gök cismi görüntüleri elde etmek istiyorsun.', options: ['teleskop', 'sonda', 'istasyon'] }
+];
+
+const DAILY_TECH = [
+  { area: 'Sağlık', emoji: '🩺', items: 'MR cihazı, tomografi, ultrason, kanser dedektörleri, yapay kalp pompası' },
+  { area: 'İletişim', emoji: '📶', items: 'İnternet üzerinden veri alışverişi sağlayan yazılım teknolojileri' },
+  { area: 'Ulaşım', emoji: '🧭', items: 'Akıllı telefon ve otomobillerdeki navigasyon (GPS)' },
+  { area: 'Enerji', emoji: '☀️', items: 'Güneş panelleri' },
+  { area: 'Endüstri', emoji: '🏭', items: 'Teflon, yansıtıcı alüminyum folyo, ısıya dayanıklı kıyafetler, duman dedektörü' },
+  { area: 'Gıda', emoji: '🍱', items: 'Uzun süre bozulmayan pratik yiyecekler, su filtreleri' }
+];
+
+const PERFORMANCE_TASK = {
+  title: 'Uzay Teknolojileri Modeli',
+  amac: 'Uzay gözlem araçları ile ilgili bilimsel bir model oluşturmak.',
+  text: '2-3 kişilik gruplar oluşturun. Basit malzemeler veya atık malzemelerden yararlanarak dürbün, teleskop, yapay uydu ya da Ay yüzeyinde inceleme yapacak bir gezici araç modeli tasarlayın. Tasarımınızı önce çizin, sonra öğretmeninizin rehberliğinde oluşturun ve sınıfta sunun.'
+};
+
+// ---------------------------------------------------------
+const SATELLITES = [
+  { id:'t1a', name:'Türksat 1A', date:'20 Ocak 1994', type:'basarisiz', active:false, desc:'Türkiye\'nin uzaya gönderdiği ilk uydu. Fransız Guyanası\'ndan fırlatılırken rokette çıkan arıza nedeniyle kısa süre sonra okyanusa düştü, hiçbir zaman aktif olarak görev yapamadı.' },
+  { id:'t1b', name:'Türksat 1B', date:'11 Ağustos 1994', type:'haberlesme', active:false, desc:'Türkiye\'nin uzayda görev yapan ilk haberleşme uydusudur. Görev süresini doldurup ömrünü tamamlamış, artık aktif olarak kullanılmamaktadır.' },
+  { id:'t1c', name:'Türksat 1C', date:'10 Temmuz 1996', type:'haberlesme', active:false, desc:'Haberleşme ve iletişim amacıyla kullanılmış bir uydudur. Görev süresini doldurup ömrünü tamamlamış, artık aktif olarak kullanılmamaktadır.' },
+  { id:'t2a', name:'Türksat 2A', date:'11 Ocak 2001', type:'haberlesme', active:false, desc:'Haberleşme ve iletişim amacıyla kullanılmış bir uydudur. Görev süresini doldurup ömrünü tamamlamış, artık aktif olarak kullanılmamaktadır.' },
+  { id:'bilsat', name:'Bilsat', date:'27 Eylül 2003', type:'gozlem', active:false, desc:'Türkiye\'nin ilk yerli gözlem ve araştırma uydusudur. Görev süresini doldurup ömrünü tamamlamış, artık aktif olarak kullanılmamaktadır.' },
+  { id:'t3a', name:'Türksat 3A', date:'13 Haziran 2008', type:'haberlesme', active:true, desc:'Görev süresi 20 yıl olarak planlanmıştır. Haberleşme ve iletişim için kullanılmaktadır.' },
+  { id:'rasat', name:'Rasat', date:'17 Ağustos 2011', type:'gozlem', active:false, desc:'Türkiye\'nin ilk yerli yer gözlem uydusudur. 3 yıllık tasarım ömrünü aşarak 11 yıl görev yapmış, ardından iletişim sorunları nedeniyle görevini tamamlamıştır.' },
+  { id:'gokturk2', name:'Göktürk 2', date:'18 Aralık 2012', type:'gozlem', active:true, desc:'TÜBİTAK UZAY, Türk Havacılık ve Uzay Sanayii (TUSAŞ) ve Millî Savunma Bakanlığı iş birliğiyle geliştirilen ilk yüksek çözünürlüklü keşif ve gözlem uydusu.' },
+  { id:'t4a', name:'Türksat 4A', date:'14 Şubat 2014', type:'haberlesme', active:true, desc:'Haberleşme ve iletişim için kullanılmaktadır.' },
+  { id:'t4b', name:'Türksat 4B', date:'16 Ekim 2015', type:'haberlesme', active:true, desc:'Haberleşme ve iletişim için kullanılmaktadır.' },
+  { id:'gokturk1', name:'Göktürk 1', date:'5 Aralık 2016', type:'gozlem', active:true, desc:'Yüksek çözünürlüklü görüntü elde edilmesini sağlayan bir gözlem uydusudur.' },
+  { id:'t5a', name:'Türksat 5A', date:'8 Ocak 2021', type:'haberlesme', active:true, desc:'Haberleşme ve iletişim için kullanılmaktadır.' },
+  { id:'t5b', name:'Türksat 5B', date:'19 Aralık 2021', type:'haberlesme', active:true, desc:'Haberleşme ve iletişim için kullanılmaktadır.' },
+  { id:'imece', name:'İMECE', date:'15 Nisan 2023', type:'gozlem', active:true, desc:'TÜBİTAK UZAY tarafından tamamen yerli ve millî olarak geliştirilen bir gözlem uydusu.' },
+  { id:'t6a', name:'Türksat 6A', date:'9 Temmuz 2024', type:'haberlesme', active:true, desc:'Türkiye\'nin ilk yerli ve millî haberleşme uydusu. 15 yıl boyunca ülkenin haberleşme ihtiyacının önemli bir bölümünü karşılaması beklenmektedir.' }
+];
+// Görev türü sınıflandırma oyununda kullanılacaklar (başarısız fırlatma hariç, aktif+emekli dahil)
+const SATELLITES_FOR_SORT = SATELLITES.filter(s => s.type !== 'basarisiz');
+// Aktif/emekli sınıflandırma oyununda kullanılacaklar (tümü, başarısız fırlatma dahil)
+const SATELLITES_FOR_STATUS = SATELLITES.map(s => s.id);
+
+const TURKEY_SPACE_FACTS = [
+  'Türkiye\'nin uzay serüveni 1994\'te Türksat 1A ile başlamıştır.',
+  'Ülkemizin uzayda aktif olarak çalışan 6\'sı haberleşme, 3\'ü yer gözlem ve keşif olmak üzere toplam 9 uydusu bulunmaktadır.',
+  'Görev süresini doldurup ömrünü tamamlamış diğer uydularımız: Türksat 1B, 1C, 2A (haberleşme) ile Bilsat ve Rasat (gözlem).',
+  'TÜBİTAK Uzay Teknolojileri Araştırma Enstitüsü (TÜBİTAK UZAY), Türkiye\'nin uzay çağındaki lider araştırma ve geliştirme kuruluşudur.',
+  'Türkiye Uzay Ajansı (TUA), 2018 yılında ülkemizin uzay ve havacılık bilimi ile teknolojilerine yönelik amaçlarını gerçekleştirmek için kurulmuştur.',
+  'TEKNOFEST, 2018\'den bu yana düzenlenen Türkiye\'nin ilk ve tek havacılık, uzay ve teknoloji festivalidir.'
+];
+
+// ---------------------------------------------------------
+const TELESCOPES = {
+  space: [
+    {
+      id: 'hubble', name: 'Hubble Uzay Teleskobu', emoji: '🔭',
+      date: '24 Nisan 1990', desc: 'İlk uzay teleskobudur. Dünya yörüngesine taşınmış, ancak ilk görüntüleri net olmadığı için 1993\'te onarılmıştır. Bu tarihten itibaren evrenin fotoğraflarını Dünya\'ya göndermeye başlamıştır.'
+    },
+    {
+      id: 'jwst', name: 'James Webb Uzay Teleskobu', emoji: '🪞',
+      date: '25 Aralık 2021', desc: 'Günümüzün en gelişmiş uzay teleskobudur. Hubble\'dan 100 kat daha güçlüdür ve uzaya yerleştirilen en büyük teleskoptur. Rokete sığması için origami tekniğiyle katlanmış, uzayda açılarak tenis kortu büyüklüğüne ulaşmıştır.'
+    }
+  ],
+  ground: {
+    desc: 'Yeryüzüne yerleştirilmiş teleskoplardır. Görünür ışığın yanında kızılötesi, radyo dalgaları gibi bazı ışınları da yakalayabilirler; ancak atmosferden geçemeyen bazı ışınları yakalayamazlar. Uzay teleskoplarına göre dezavantajlı görünse de düşük maliyetleri, bakım ve yenilenmelerinin kolay olması sebebiyle tercih edilirler. Teleskopların yerleştirildiği kubbe benzeri yapılara gözlemevi (rasathane) denir.',
+    criteria: [
+      'Yerleşim merkezlerine uzak, ışık kirliliğinden etkilenmeyecek bir bölgede olması',
+      'Hava koşullarının gözlem yapmaya uygun olması',
+      'Yüksek rakımlı olması',
+      'Deprem kuşaklarından uzak olması',
+      'TV ve radyo yayınlarından uzak olması'
+    ],
+    wrongCriteria: [
+      'Şehir merkezine ve alışveriş alanlarına yakın olması',
+      'Toplu taşıma duraklarına yakın olması',
+      'Gece aydınlatmasının güçlü olduğu bir bölgede olması'
+    ],
+    observatories: [
+      { id:'tug', name:'TUG (TÜBİTAK Ulusal Gözlemevi)', desc:'Antalya\'da, Toros Dağları\'nın zirvelerinden Bakırlıtepe\'de kurulmuştur. Ülkemizin en büyük gözlemevi olan TUG, Ocak 1997\'den bu yana modern bir araştırma merkezi olarak görev yapmaktadır.' },
+      { id:'dag', name:'DAĞ (Doğu Anadolu Gözlemevi)', desc:'Erzurum\'daki Karakaya Tepeleri\'ne kurulmaktadır. Proje tamamlandığında dünyanın en yüksek rakımda kurulan üçüncü gözlemevi olması ve 4 metre ayna çapıyla Avrupa\'nın en büyük gözlemevleri arasında yer alması beklenmektedir. Hubble\'dan elde edilenden daha kaliteli görüntülere ulaşılması hedeflenmektedir.' }
+    ]
+  }
+};
+
+// ---------------------------------------------------------
+const PIONEERS = [
+  {
+    id: 'gagarin', name: 'Yuri Gagarin', years: '1934–1968', emoji: '🇷🇺',
+    title: '"Kozmosun Kolomb\'u"',
+    bio: 'Sovyetler Birliği askerî pilotu ve kozmonotudur. 1961 yılında Vostok 1 adlı uzay aracıyla Dünya\'nın yörüngesine giren ilk insan olmuştur. Uçuşunda Dünya\'nın 327 km üzerine çıkarak uzaya çıkan ilk insan olmayı başarmıştır.'
+  },
+  {
+    id: 'gezeravci', name: 'Alper Gezeravcı', years: 'İlk Türk Astronot', emoji: '🇹🇷',
+    title: 'Türkiye\'nin İlk İnsanlı Uzay Misyonu',
+    bio: '19 Ocak 2024\'te Falcon 9 roketiyle Florida\'daki Kennedy Uzay Merkezi\'nden, Türk Astronot ve Bilim Misyonu Projesi kapsamında uzay yolculuğuna başlamıştır. Uluslararası Uzay İstasyonu\'nda biyoloji, tıp, malzeme bilimi ve genetik alanlarında 13 farklı bilimsel deney yapmıştır. Uzaydan gönderdiği ilk mesaj, Atatürk\'ün "İstikbal göklerdedir" sözü olmuştur.'
+  },
+  {
+    id: 'gokdogan', name: 'Nüzhet Toydemir Gökdoğan', years: '1910–2003', emoji: '⭐',
+    title: 'Türkiye\'nin İlk Kadın Astronomu',
+    bio: 'Türkiye Cumhuriyeti\'nin ilk kadın astronomu, dekanı ve senatörüdür. İstanbul Üniversitesi Fen Fakültesi Astronomi Enstitüsüne ilk Türk doçenti olarak atanmıştır. Türk Astronomi Derneğinin kurucularındandır. "Tüm astronomların kullanacağı uluslararası nitelikli bir gözlemevi kurmalıyız" sözüyle tanınır.'
+  }
+];
+
+const PIONEER_QUIZ = [
+  { q: 'Uzaya çıkan ilk insan kimdir?', options: ['gagarin', 'gezeravci', 'gokdogan'] },
+  { q: 'Türkiye\'nin ilk kadın astronomu kimdir?', options: ['gokdogan', 'gagarin', 'gezeravci'] },
+  { q: 'Uzaydan gönderdiği ilk mesaj Atatürk\'ün "İstikbal göklerdedir" sözü olan kişi kimdir?', options: ['gezeravci', 'gagarin', 'gokdogan'] }
+];
+
+const GLOSSARY = [
+  ['Astronomi (Gök bilimi)', 'Gök cisimlerinin konumlarını, hareketlerini, yapılarını ve birbirine olan uzaklıklarını inceleyen bilim dalıdır.'],
+  ['Astronom (Gök bilimci)', 'Uzay araştırmaları alanında uzmanlaşmış bilim insanıdır.'],
+  ['Astronot', 'İnsanlı uzay çalışmalarında görev yapan kişidir. Ruslar "kozmonot", Çinliler "taykonot" ifadesini kullanır.']
+];
+
+// ---------------------------------------------------------
+const SPACE_DEBRIS = {
+  intro: 'Dünya\'nın hâlen görevde olan ya da görevini tamamlamış binlerce yapay uydusu vardır. Görevini tamamlamış uydular, işlevini yitirmiş roket parçaları, yakıt tankları, uzay sondaları gibi uzay araçlarından kalan parçalar kontrol dışı olarak Dünya\'nın etrafında dolanmaya devam etmektedir.',
+  stat: 'Space Surveillance Network (Uzay Gözetim Ağı - SSN), radar ve teleskoplar kullanarak Dünya\'nın etrafında hareket eden kalıntıları tespit ediyor, raporluyor ve izliyor. Bu raporlara göre farklı büyüklüklerde yaklaşık 130 milyondan fazla parçacığın uzay çöpü olarak dolaştığı tespit edilmiştir.',
+  danger: 'Dünya\'nın etrafında hareket eden parçacıklar çok yüksek hızlara ulaşabildikleri için küçük parçalar bile uzay araçlarına büyük zararlar verebilir. Örneğin sadece 1,2 cm çapındaki bir bilyenin 18 cm kalınlığındaki metal bir levhaya çarpması ciddi hasara yol açabilmektedir.',
+  problems: ['Haberleşmede aksamalar', 'Ulaşım sistemlerinde aksamalar', 'Ulusal güvenlikte aksamalar'],
+  solutions: [
+    { text: 'Uzay çöplerini çeşitli sistemlerle yakalayıp Dünya\'ya getirmek', correct: true },
+    { text: 'Uzay araştırmaları için daha çevreci ve sürdürülebilir teknolojiler geliştirmek', correct: true },
+    { text: 'Uzay çöpünü izleme ve raporlama ağlarını (SSN gibi) geliştirmek', correct: true },
+    { text: 'Görevini tamamlamış uyduları hiç söküp değiştirmeden uzayda bırakmak', correct: false },
+    { text: 'Daha fazla tek kullanımlık roket parçası uzayda bırakmak', correct: false }
+  ]
+};
+
+// ---------------------------------------------------------
+const BADGES = {
+  vehicles: { emoji: '🛰️', name: 'Araç Uzmanı' },
+  satellites: { emoji: '🇹🇷', name: 'Filo Komutanı' },
+  telescopes: { emoji: '🔭', name: 'Gökbilimci' },
+  pioneers: { emoji: '🧑‍🚀', name: 'Tarihe Tanık' },
+  debris: { emoji: '♻️', name: 'Çevre Koruyucu' }
+};
+
+// ---------------------------------------------------------
+const FINAL_QUIZ = [
+  { q: 'Bir gök cismini incelemek üzere uzaya gönderilen ve Dünya\'dan kontrol edilebilen robotik uzay aracı hangisidir?', options: ['Uzay sondası', 'Uzay mekiği', 'Yapay uydu', 'Uzay istasyonu'], answer: 0 },
+  { q: 'Aşağıdakilerden hangisi yeniden kullanılabilir DEĞİLDİR?', options: ['Uzay roketi (günümüzde)', 'Uzay mekiği', 'Uzay istasyonu', 'Hiçbiri'], answer: 2 },
+  { q: 'Türkiye\'nin ilk yerli ve millî haberleşme uydusu hangisidir?', options: ['Türksat 1A', 'Göktürk 1', 'İMECE', 'Türksat 6A'], answer: 3 },
+  { q: 'Göktürk 1 ve Göktürk 2 uyduları hangi amaçla kullanılır?', options: ['Haberleşme', 'Gözlem ve keşif', 'Hava tahmini', 'Astronot taşıma'], answer: 1 },
+  { q: 'İlk uzay teleskobu hangisidir?', options: ['James Webb', 'Hubble', 'TUG', 'DAĞ'], answer: 1 },
+  { q: 'James Webb Uzay Teleskobu, rokete sığabilmesi için hangi teknikle katlanmıştır?', options: ['Origami tekniği', 'Modüler birleştirme', 'Şişirme teknolojisi', 'Katlanmamıştır'], answer: 0 },
+  { q: 'Türkiye\'nin en büyük gözlemevi olan ve Antalya\'da bulunan gözlemevi hangisidir?', options: ['DAĞ', 'TUG', 'NASA', 'ESA'], answer: 1 },
+  { q: 'İyi bir gözlemevi yeri için aşağıdakilerden hangisi ARANMAZ?', options: ['Yüksek rakımlı olması', 'Işık kirliliğinden uzak olması', 'Şehir merkezine yakın olması', 'Deprem kuşağından uzak olması'], answer: 2 },
+  { q: 'Uzaya çıkan ilk insan kimdir?', options: ['Alper Gezeravcı', 'Yuri Gagarin', 'Nüzhet Gökdoğan', 'Neil Armstrong'], answer: 1 },
+  { q: 'İlk Türk astronot Alper Gezeravcı hangi yıl uzaya gitmiştir?', options: ['2018', '2021', '2024', '2016'], answer: 2 },
+  { q: 'Türkiye\'nin ilk kadın astronomu kimdir?', options: ['Nüzhet Toydemir Gökdoğan', 'Yuri Gagarin', 'Alper Gezeravcı', 'Feryal Özel'], answer: 0 },
+  { q: 'Space Surveillance Network (SSN) neyi izler?', options: ['Hava durumunu', 'Uzay çöpünü', 'Deprem hareketlerini', 'Uydu sinyallerini'], answer: 1 },
+  { q: 'Uzay çöpünün en büyük tehlikesi nedir?', options: ['Görüntü kirliliği yapması', 'Çok yüksek hızda uzay araçlarına çarpıp hasar vermesi', 'Radyo dalgalarını engellemesi', 'Hiçbir tehlikesi yoktur'], answer: 1 },
+  { q: 'Uzay araştırmaları için geliştirilen teknolojilerden GPS hangi günlük alanda kullanılır?', options: ['Sağlık', 'Ulaşım', 'Gıda', 'Endüstri'], answer: 1 },
+  { q: 'Aşağıdakilerden hangisi bir uzay çöpü çözümü DEĞİLDİR?', options: ['Çevreci ve sürdürülebilir teknoloji geliştirmek', 'İzleme ağlarını geliştirmek', 'Çöpleri yakalama sistemleri kurmak', 'Daha fazla tek kullanımlık parça uzayda bırakmak'], answer: 3 }
+];
+
+
+// ---------------------------------------------------------
+// UZAY GÖREVİ — Görev motoru
+// ---------------------------------------------------------
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+const STAGES = [
+  { key:'brief', label:'Brifing', emoji:'📋' },
+  { key:'vehicles', label:'Araçlar', emoji:'🛰️' },
+  { key:'satellites', label:'Uydular', emoji:'🇹🇷' },
+  { key:'telescopes', label:'Teleskoplar', emoji:'🔭' },
+  { key:'pioneers', label:'Öncüler', emoji:'🧑‍🚀' },
+  { key:'debris', label:'Uzay Çöpü', emoji:'♻️' },
+  { key:'final', label:'Final Test', emoji:'📝' },
+  { key:'cert', label:'Sertifika', emoji:'🎖️' }
+];
+
+const state = {
+  currentIndex: 0,
+  unlockedIndex: 0,
+  completed: {},
+  stageSub: {},
+  challengeState: {},
+  stageScore: {},
+  studentName: ''
+};
+
+/* ================= Rozet dereceleri (performansa göre) ================= */
+function getStageScore(badgeKey){
+  if(badgeKey === 'satellites'){
+    const a = state.stageScore.satType || { correct:0, total:0 };
+    const b = state.stageScore.satStatus || { correct:0, total:0 };
+    return { correct: a.correct + b.correct, total: a.total + b.total };
+  }
+  return state.stageScore[badgeKey] || { correct:0, total:0 };
+}
+function getRankTier(score){
+  if(!score || score.total === 0) return { key:'none', label:'Henüz Değerlendirilmedi', emoji:'⏳', pct:null };
+  const pct = Math.round(score.correct / score.total * 100);
+  if(score.correct === score.total) return { key:'gold', label:'Altın Derece', emoji:'🥇', pct };
+  if(pct >= 70) return { key:'silver', label:'Gümüş Derece', emoji:'🥈', pct };
+  if(pct >= 50) return { key:'bronze', label:'Bronz Derece', emoji:'🥉', pct };
+  return { key:'needs', label:'Geliştirilmeli', emoji:'🔻', pct };
+}
+
+/* ================= Rail (görev ilerleme çubuğu) ================= */
+function renderRail(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = '';
+  STAGES.forEach((s, i) => {
+    const node = document.createElement('div');
+    let cls = 'rail-node';
+    if(state.completed[s.key]) cls += ' done';
+    else if(i === state.currentIndex) cls += ' current';
+    if(i > state.unlockedIndex) cls += ' disabled';
+    node.className = cls;
+    const lineDone = i <= state.unlockedIndex ? ' done' : '';
+    const dotContent = state.completed[s.key] ? '✓' : (i > state.unlockedIndex ? '🔒' : s.emoji);
+    node.innerHTML = `<div class="rail-line${lineDone}"></div><div class="rail-dot">${dotContent}</div><div class="rail-label">${s.label}</div>`;
+    node.onclick = () => { if(i <= state.unlockedIndex) navigateTo(i); };
+    rail.appendChild(node);
+  });
+}
+
+function navigateTo(index){
+  state.currentIndex = Math.max(0, Math.min(index, STAGES.length - 1));
+  renderRail();
+  renderStage();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function completeStage(key){
+  state.completed[key] = true;
+  const idx = STAGES.findIndex(s => s.key === key);
+  if(state.unlockedIndex < idx + 1) state.unlockedIndex = idx + 1;
+  renderRail();
+}
+
+/* ================= Bilgi modalı ================= */
+function openInfoModal(title, bodyHtml){
+  const card = document.getElementById('modal-card');
+  card.innerHTML = `
+    <button class="modal-close" id="modal-close-btn" aria-label="Kapat">✕</button>
+    <div class="modal-title">${title}</div>
+    ${bodyHtml}
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('modal-close-btn').onclick = closeInfoModal;
+}
+function closeInfoModal(){
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+function wireModal(){
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if(e.target.id === 'modal-overlay') closeInfoModal();
+  });
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeInfoModal(); });
+}
+function factsListHtml(facts){
+  return `<ul class="modal-list">${facts.map(f => `<li>${f}</li>`).join('')}</ul>`;
+}
+
+/* ================= Genel: ardışık çoktan seçmeli meydan okuma ================= */
+function renderSequentialChallenge(root, opts){
+  const cs = state.challengeState[opts.stageKey];
+  const total = opts.questions.length;
+
+  if(cs.qIndex >= total){
+    state.stageScore[opts.stageKey] = { correct: cs.correct, total };
+    root.innerHTML = `
+      <div class="panel">
+        <div class="eyebrow">${opts.eyebrow} · Sonuç</div>
+        <div class="stage-title">${opts.resultTitle}</div>
+        <p class="stage-lead">Meydan okumayı tamamladın: <strong>${cs.correct}/${total}</strong> doğru cevap.</p>
+        <div class="stage-badge-earn"><span class="big-emoji">${BADGES[opts.badgeKey].emoji}</span> Rozet kazandın: "${BADGES[opts.badgeKey].name}"</div>
+        <div class="btn-row">
+          <button class="btn secondary" id="retry-btn">🔁 Tekrar Dene</button>
+          <button class="btn" id="continue-btn">Sonraki Aşama ➜</button>
+        </div>
+      </div>`;
+    document.getElementById('retry-btn').onclick = () => {
+      state.challengeState[opts.stageKey] = { qIndex: 0, correct: 0 };
+      renderStage();
+    };
+    document.getElementById('continue-btn').onclick = () => {
+      completeStage(opts.stageKey);
+      navigateTo(state.currentIndex + 1);
+    };
+    return;
+  }
+
+  const q = opts.questions[cs.qIndex];
+  const correctId = q.options[0];
+  const shuffled = shuffle(q.options);
+
+  root.innerHTML = `
+    <div class="panel">
+      <div class="eyebrow">${opts.eyebrow} · Meydan Okuma</div>
+      <div class="stage-title">${opts.challengeTitle}</div>
+      <div class="challenge-box">
+        <div class="challenge-progress">SORU ${cs.qIndex+1} / ${total}</div>
+        <div class="challenge-q">${q.prompt}</div>
+        <div class="opt-list" id="opt-list"></div>
+      </div>
+    </div>`;
+
+  const optList = document.getElementById('opt-list');
+  shuffled.forEach(id => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.dataset.id = id;
+    b.textContent = opts.renderOption(id);
+    b.onclick = () => {
+      const allBtns = [...optList.querySelectorAll('.opt-btn')];
+      allBtns.forEach(x => x.disabled = true);
+      allBtns.forEach(x => { if(x.dataset.id === correctId) x.classList.add('correct'); });
+      if(id !== correctId) b.classList.add('wrong');
+      else cs.correct++;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'btn-row';
+      const nb = document.createElement('button');
+      nb.className = 'btn';
+      nb.textContent = (cs.qIndex + 1 < total) ? 'Sonraki ➜' : 'Sonucu Gör ➜';
+      nb.onclick = () => { cs.qIndex++; renderStage(); };
+      wrap.appendChild(nb);
+      root.querySelector('.panel').appendChild(wrap);
+    };
+    optList.appendChild(b);
+  });
+}
+
+/* ================= Genel: çoklu seçim meydan okuma ================= */
+function renderMultiSelectChallenge(root, opts){
+  const cs = state.challengeState[opts.stageKey];
+  if(!cs.items){
+    cs.items = shuffle(opts.items);
+    cs.picked = new Set();
+    cs.checked = false;
+  }
+
+  root.innerHTML = `
+    <div class="panel">
+      <div class="eyebrow">${opts.eyebrow} · Meydan Okuma</div>
+      <div class="stage-title">${opts.challengeTitle}</div>
+      <p class="stage-lead">${opts.instruction}</p>
+      <div class="opt-list" id="multi-list"></div>
+      <div class="btn-row" id="multi-actions"></div>
+      <div class="feedback-banner" id="multi-feedback"></div>
+    </div>`;
+
+  const list = document.getElementById('multi-list');
+  cs.items.forEach((item, idx) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn multi' + (cs.picked.has(idx) ? ' picked' : '');
+    b.textContent = item.text;
+    b.disabled = cs.checked;
+    if(cs.checked){
+      if(cs.picked.has(idx) && item.correct) b.classList.add('correct');
+      else if(cs.picked.has(idx) && !item.correct) b.classList.add('wrong');
+      else if(!cs.picked.has(idx) && item.correct) b.classList.add('missed');
+    }
+    b.onclick = () => {
+      if(cs.checked) return;
+      if(cs.picked.has(idx)) cs.picked.delete(idx); else cs.picked.add(idx);
+      renderStage();
+    };
+    list.appendChild(b);
+  });
+
+  const actions = document.getElementById('multi-actions');
+  if(!cs.checked){
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'btn';
+    checkBtn.textContent = '✅ Kontrol Et';
+    checkBtn.onclick = () => {
+      cs.checked = true;
+      let correctCount = 0, total = 0;
+      cs.items.forEach((item, idx) => {
+        if(item.correct) total++;
+        if(item.correct && cs.picked.has(idx)) correctCount++;
+      });
+      cs.correctCount = correctCount;
+      cs.totalCorrect = total;
+      state.stageScore[opts.stageKey] = { correct: correctCount, total };
+      renderStage();
+    };
+    actions.appendChild(checkBtn);
+  } else {
+    const fb = document.getElementById('multi-feedback');
+    fb.className = 'feedback-banner show ' + (cs.correctCount === cs.totalCorrect ? 'good' : 'bad');
+    fb.textContent = `${cs.correctCount}/${cs.totalCorrect} doğru seçenek işaretlendi. Turuncu çerçeveliler kaçırdığın doğru seçeneklerdi.`;
+
+    const badgeWrap = document.createElement('div');
+    badgeWrap.className = 'stage-badge-earn';
+    badgeWrap.innerHTML = `<span class="big-emoji">${BADGES[opts.badgeKey].emoji}</span> Rozet kazandın: "${BADGES[opts.badgeKey].name}"`;
+    document.querySelector('.panel').appendChild(badgeWrap);
+
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'btn secondary';
+    retryBtn.textContent = '🔁 Tekrar Dene';
+    retryBtn.onclick = () => { state.challengeState[opts.stageKey] = null; state.challengeState[opts.stageKey] = {}; renderStage(); };
+
+    const contBtn = document.createElement('button');
+    contBtn.className = 'btn';
+    contBtn.textContent = 'Sonraki Aşama ➜';
+    contBtn.onclick = () => { completeStage(opts.stageKey); navigateTo(state.currentIndex + 1); };
+
+    actions.appendChild(retryBtn);
+    actions.appendChild(contBtn);
+  }
+}
+
+/* ================= Sürükle-bırak motoru ================= */
+let currentDrag = null;
+
+function attachDrag(chipEl, id, onDrop){
+  chipEl.addEventListener('pointerdown', (e) => {
+    if(e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();
+    startDrag(e, chipEl, id, onDrop);
+  });
+}
+function startDrag(e, chipEl, id, onDrop){
+  const ghost = chipEl.cloneNode(true);
+  ghost.classList.add('drag-ghost');
+  document.body.appendChild(ghost);
+  positionGhost(ghost, e.clientX, e.clientY);
+  chipEl.classList.add('dragging');
+  currentDrag = { id, ghost, onDrop };
+  document.addEventListener('pointermove', onDragMove);
+  document.addEventListener('pointerup', onDragEnd);
+}
+function positionGhost(ghost, x, y){ ghost.style.left = x + 'px'; ghost.style.top = y + 'px'; }
+function onDragMove(e){
+  if(!currentDrag) return;
+  positionGhost(currentDrag.ghost, e.clientX, e.clientY);
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const target = el ? el.closest('.dropzone, .pool') : null;
+  if(target) target.classList.add('drag-over');
+}
+function onDragEnd(e){
+  if(!currentDrag) return;
+  document.removeEventListener('pointermove', onDragMove);
+  document.removeEventListener('pointerup', onDragEnd);
+  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  currentDrag.ghost.remove();
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const target = el ? el.closest('.dropzone, .pool') : null;
+  const drag = currentDrag;
+  currentDrag = null;
+  drag.onDrop(target, drag.id);
+}
+
+/* ================= AŞAMA 0: Brifing ================= */
+function renderBrief(root){
+  root.innerHTML = `
+    <div class="panel">
+      <div class="eyebrow">Görev Dosyası #001</div>
+      <div class="stage-title">📋 Göreve Hoş Geldin, Uzman Adayı</div>
+      <p class="stage-lead">Türkiye Uzay Ajansı'na (TUA) yeni katıldın. Tam yetkili bir "Görev Uzmanı" olabilmen için beş aşamayı tamamlaman gerekiyor: uzay araçlarını tanımalı, Türkiye'nin uydu filosunu incelemeli, gözlem ağını kurmalı, uzay öncülerinden ilham almalı ve uzay çöpü sorununa çözüm üretmelisin. Her aşamayı tamamladığında bir rozet kazanacak, sonunda kendi "Uzay Uzmanlığı Sertifikası"nı alacaksın.</p>
+      <div class="card-grid" id="badge-preview"></div>
+      <div class="btn-row"><button class="btn" id="start-btn">🚀 Göreve Başla</button></div>
+    </div>`;
+  const preview = document.getElementById('badge-preview');
+  Object.values(BADGES).forEach(b => {
+    const c = document.createElement('div');
+    c.className = 'info-card';
+    c.style.textAlign = 'center';
+    c.style.opacity = '.55';
+    c.innerHTML = `<span class="ic-emoji">🔒</span><div class="ic-name">${b.name}</div>`;
+    preview.appendChild(c);
+  });
+  document.getElementById('start-btn').onclick = () => {
+    if(state.unlockedIndex < 1) state.unlockedIndex = 1;
+    navigateTo(1);
+  };
+}
+
+/* ================= AŞAMA 1: Uzay Araçları ================= */
+function renderVehicles(root){
+  const sub = state.stageSub.vehicles || 'learn';
+  if(!state.challengeState.vehicles) state.challengeState.vehicles = { qIndex: 0, correct: 0 };
+
+  if(sub === 'learn'){
+    root.innerHTML = `
+      <div class="panel">
+        <div class="eyebrow">Aşama 1 / 5</div>
+        <div class="stage-title">🛰️ Araç Filosunu Tanı</div>
+        <p class="stage-lead">Uzay araştırmaları için altı temel araç türü geliştirilmiştir. Her birine tıklayarak özelliklerini incele, sonra göreve geç.</p>
+        <div class="card-grid" id="vehicle-cards"></div>
+        <div class="aside-note">
+          <div class="an-title">💡 BİLİYOR MUYDUN?</div>
+          Uzay araştırmaları için geliştirilen birçok teknoloji günlük hayatımızda da kullanılıyor — ${DAILY_TECH.map(d => `${d.emoji} ${d.area.toLowerCase()}`).join(', ')} gibi alanlarda karşımıza çıkıyor.
+        </div>
+        <div class="aside-note">
+          <div class="an-title">🛠️ BUNU DA SINIFTA YAPIN</div>
+          <strong>${PERFORMANCE_TASK.title}:</strong> ${PERFORMANCE_TASK.text}
+        </div>
+        <div class="btn-row"><button class="btn" id="to-challenge">Meydan Okumaya Geç ➜</button></div>
+      </div>`;
+    const cardsEl = document.getElementById('vehicle-cards');
+    VEHICLES.forEach(v => {
+      const c = document.createElement('div');
+      c.className = 'info-card';
+      c.innerHTML = `<span class="ic-emoji">${v.emoji}</span><div class="ic-name">${v.name}</div><div class="ic-def">${v.def}</div>`;
+      c.onclick = () => openInfoModal(`${v.emoji} ${v.name}`, factsListHtml(v.facts));
+      cardsEl.appendChild(c);
+    });
+    document.getElementById('to-challenge').onclick = () => { state.stageSub.vehicles = 'challenge'; renderStage(); };
+  } else {
+    renderSequentialChallenge(root, {
+      stageKey: 'vehicles',
+      badgeKey: 'vehicles',
+      eyebrow: 'Aşama 1 / 5',
+      challengeTitle: '🛰️ Doğru Aracı Seç',
+      resultTitle: '🛰️ Araç Filosu Değerlendirmesi',
+      questions: VEHICLE_CHALLENGE.map(v => ({ prompt: v.scenario, options: v.options })),
+      renderOption: (id) => { const v = VEHICLES.find(x => x.id === id); return `${v.emoji} ${v.name}`; }
+    });
+  }
+}
+
+/* ================= AŞAMA 2: Türkiye'nin Uyduları ================= */
+function renderSatellites(root){
+  const sub = state.stageSub.satellites || 'learn';
+  if(sub === 'learn'){
+    root.innerHTML = `
+      <div class="panel">
+        <div class="eyebrow">Aşama 2 / 5</div>
+        <div class="stage-title">🇹🇷 Türkiye'nin Uydu Filosu</div>
+        <p class="stage-lead">1994'ten günümüze Türkiye'nin uzaya gönderdiği uydulara göz at (kartlara tıkla), sonra göreve geç.</p>
+        <div class="card-grid" id="sat-cards"></div>
+        <div class="aside-note">
+          <div class="an-title">💡 BİLİYOR MUYDUN?</div>
+          ${TURKEY_SPACE_FACTS.map(f => f).join(' ')}
+        </div>
+        <div class="btn-row"><button class="btn" id="to-challenge">Meydan Okumaya Geç ➜</button></div>
+      </div>`;
+    const cardsEl = document.getElementById('sat-cards');
+    SATELLITES.forEach(s => {
+      const c = document.createElement('div');
+      c.className = 'info-card';
+      const badge = s.type === 'haberlesme' ? '📡 Haberleşme' : (s.type === 'gozlem' ? '🔍 Gözlem/Keşif' : '⚠️ Başarısız Fırlatma');
+      const statusTag = s.active ? '<span style="color:var(--green)">✅ Aktif</span>' : '<span style="color:var(--dim)">🛑 Görev Dışı</span>';
+      c.innerHTML = `<div class="ic-date">${s.date}</div><div class="ic-name">${s.name}</div><div class="ic-def">${badge} · ${statusTag}</div>`;
+      c.onclick = () => openInfoModal(s.name, `<p style="font-size:13.5px;line-height:1.6;color:var(--text)">${s.desc}</p>`);
+      cardsEl.appendChild(c);
+    });
+    document.getElementById('to-challenge').onclick = () => { state.stageSub.satellites = 'type'; renderStage(); };
+  } else if(sub === 'type'){
+    renderSatelliteClassify(root, {
+      stateKey: 'satType',
+      eyebrow: 'Aşama 2 / 5 · Meydan Okuma 1/2',
+      title: '🇹🇷 Uyduları Görev Türüne Göre Ayır',
+      instruction: 'Uyduları sürükleyip doğru kutuya bırak: haberleşme mi, yoksa gözlem/keşif mi?',
+      poolIds: SATELLITES_FOR_SORT.map(s => s.id),
+      zones: [
+        { key: 'haberlesme', label: '📡 Haberleşme' },
+        { key: 'gozlem', label: '🔍 Gözlem / Keşif' }
+      ],
+      correctZone: (s) => s.type,
+      onComplete: (actions) => {
+        const nb = document.createElement('button');
+        nb.className = 'btn';
+        nb.textContent = 'Sonraki Meydan Okuma ➜';
+        nb.onclick = () => { state.stageSub.satellites = 'status'; renderStage(); };
+        actions.appendChild(nb);
+      }
+    });
+  } else {
+    renderSatelliteClassify(root, {
+      stateKey: 'satStatus',
+      eyebrow: 'Aşama 2 / 5 · Meydan Okuma 2/2',
+      title: '🇹🇷 Aktif mi, Emekli mi?',
+      instruction: 'Uyduları sürükleyip doğru kutuya bırak: hâlâ aktif olarak görev mi yapıyor, yoksa görev süresini tamamlamış ya da hiç göreve başlayamamış mı?',
+      poolIds: SATELLITES_FOR_STATUS,
+      zones: [
+        { key: 'active', label: '✅ Aktif' },
+        { key: 'inactive', label: '🛑 Emekli / Görev Dışı' }
+      ],
+      correctZone: (s) => s.active ? 'active' : 'inactive',
+      onComplete: (actions) => {
+        const badgeWrap = document.createElement('div');
+        badgeWrap.className = 'stage-badge-earn';
+        badgeWrap.innerHTML = `<span class="big-emoji">${BADGES.satellites.emoji}</span> Rozet kazandın: "${BADGES.satellites.name}"`;
+        document.querySelector('.panel').appendChild(badgeWrap);
+
+        const contBtn = document.createElement('button');
+        contBtn.className = 'btn';
+        contBtn.textContent = 'Sonraki Aşama ➜';
+        contBtn.onclick = () => { completeStage('satellites'); navigateTo(state.currentIndex + 1); };
+        actions.appendChild(contBtn);
+      }
+    });
+  }
+}
+
+/* Genel sürükle-bırak sınıflandırma (uydu görev türü VE aktif/emekli aşamalarında kullanılır) */
+function renderSatelliteClassify(root, opts){
+  if(!state.challengeState[opts.stateKey]){
+    state.challengeState[opts.stateKey] = {
+      pool: shuffle(opts.poolIds),
+      zones: Object.fromEntries(opts.zones.map(z => [z.key, []])),
+      checked: false
+    };
+  }
+  const cs = state.challengeState[opts.stateKey];
+
+  root.innerHTML = `
+    <div class="panel">
+      <div class="eyebrow">${opts.eyebrow}</div>
+      <div class="stage-title">${opts.title}</div>
+      <p class="stage-lead">${opts.instruction}</p>
+      <div class="pool" id="cls-pool"></div>
+      <div class="dropzones" id="cls-zones"></div>
+      <div class="btn-row" id="cls-actions"></div>
+      <div class="feedback-banner" id="cls-feedback"></div>
+    </div>`;
+
+  const zonesWrap = document.getElementById('cls-zones');
+  opts.zones.forEach(z => {
+    const dz = document.createElement('div');
+    dz.className = 'dropzone';
+    dz.dataset.zone = z.key;
+    dz.innerHTML = `<h4>${z.label}</h4><div class="zone-body" id="cls-zone-${z.key}"></div>`;
+    zonesWrap.appendChild(dz);
+  });
+
+  function makeChip(id){
+    const s = SATELLITES.find(x => x.id === id);
+    const el = document.createElement('button');
+    el.className = 'chip';
+    el.dataset.id = id;
+    el.textContent = s.name;
+    attachDrag(el, id, (target) => {
+      if(!target) { renderStage(); return; }
+      if(target.id === 'cls-pool'){
+        opts.zones.forEach(z => { cs.zones[z.key] = cs.zones[z.key].filter(x => x !== id); });
+        if(!cs.pool.includes(id)) cs.pool.push(id);
+      } else if(target.classList.contains('dropzone')){
+        const zone = target.dataset.zone;
+        cs.pool = cs.pool.filter(x => x !== id);
+        opts.zones.forEach(z => { cs.zones[z.key] = cs.zones[z.key].filter(x => x !== id); });
+        cs.zones[zone].push(id);
+      }
+      renderStage();
+    });
+    return el;
+  }
+
+  const poolEl = document.getElementById('cls-pool');
+  cs.pool.forEach(id => poolEl.appendChild(makeChip(id)));
+  opts.zones.forEach(z => {
+    document.getElementById('cls-zone-' + z.key).append(...cs.zones[z.key].map(makeChip));
+  });
+
+  const actions = document.getElementById('cls-actions');
+  if(!cs.checked){
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'btn';
+    checkBtn.textContent = '✅ Kontrol Et';
+    checkBtn.onclick = () => {
+      if(cs.pool.length > 0){
+        const fb = document.getElementById('cls-feedback');
+        fb.className = 'feedback-banner show bad';
+        fb.textContent = 'Önce tüm uyduları bir kutuya yerleştir!';
+        return;
+      }
+      cs.checked = true;
+      renderStage();
+    };
+    actions.appendChild(checkBtn);
+  } else {
+    let correct = 0, total = 0;
+    opts.zones.forEach(z => {
+      document.getElementById('cls-zone-' + z.key).querySelectorAll('.chip').forEach(chipEl => {
+        const s = SATELLITES.find(x => x.id === chipEl.dataset.id);
+        const ok = opts.correctZone(s) === z.key;
+        chipEl.classList.toggle('correct', ok);
+        chipEl.classList.toggle('wrong', !ok);
+        total++;
+        if(ok) correct++;
+      });
+    });
+    state.stageScore[opts.stateKey] = { correct, total };
+
+    const fb = document.getElementById('cls-feedback');
+    fb.className = 'feedback-banner show ' + (correct === total ? 'good' : 'bad');
+    fb.textContent = `${correct}/${total} uydu doğru sınıflandırıldı.`;
+
+    const retryBtn = document.createElement('button');
+    retryBtn.className = 'btn secondary';
+    retryBtn.textContent = '🔁 Tekrar Dene';
+    retryBtn.onclick = () => { state.challengeState[opts.stateKey] = null; renderStage(); };
+    actions.appendChild(retryBtn);
+
+    opts.onComplete(actions);
+  }
+}
+
+/* ================= AŞAMA 3: Teleskoplar ================= */
+function renderTelescopes(root){
+  const sub = state.stageSub.telescopes || 'learn';
+  if(sub === 'learn'){
+    root.innerHTML = `
+      <div class="panel">
+        <div class="eyebrow">Aşama 3 / 5</div>
+        <div class="stage-title">🔭 Gözlem Ağını Kur</div>
+        <p class="stage-lead">Gök cisimlerini incelemek için iki tür teleskop kullanılır: uzay tabanlı ve yer tabanlı. Kartlara tıklayarak keşfet.</p>
+        <div class="card-grid" id="telescope-cards"></div>
+        <div class="aside-note">
+          <div class="an-title">🏔️ YER TABANLI TELESKOPLAR</div>
+          ${TELESCOPES.ground.desc}
+        </div>
+        <div class="card-grid" id="observatory-cards" style="margin-top:12px;"></div>
+        <div class="btn-row"><button class="btn" id="to-challenge">Meydan Okumaya Geç ➜</button></div>
+      </div>`;
+    const cardsEl = document.getElementById('telescope-cards');
+    TELESCOPES.space.forEach(t => {
+      const c = document.createElement('div');
+      c.className = 'info-card';
+      c.innerHTML = `<span class="ic-emoji">${t.emoji}</span><div class="ic-date">${t.date}</div><div class="ic-name">${t.name}</div><div class="ic-def">${t.desc.slice(0, 90)}…</div>`;
+      c.onclick = () => openInfoModal(`${t.emoji} ${t.name}`, `<p style="font-size:13.5px;line-height:1.6;color:var(--text)">${t.desc}</p>`);
+      cardsEl.appendChild(c);
+    });
+    const obsEl = document.getElementById('observatory-cards');
+    TELESCOPES.ground.observatories.forEach(o => {
+      const c = document.createElement('div');
+      c.className = 'info-card';
+      c.innerHTML = `<span class="ic-emoji">🏔️</span><div class="ic-name">${o.name}</div><div class="ic-def">${o.desc.slice(0, 90)}…</div>`;
+      c.onclick = () => openInfoModal(o.name, `<p style="font-size:13.5px;line-height:1.6;color:var(--text)">${o.desc}</p>`);
+      obsEl.appendChild(c);
+    });
+    document.getElementById('to-challenge').onclick = () => { state.stageSub.telescopes = 'challenge'; renderStage(); };
+  } else {
+    if(!state.challengeState.telescopes) state.challengeState.telescopes = {};
+    const items = [
+      ...TELESCOPES.ground.criteria.map(t => ({ text: t, correct: true })),
+      ...TELESCOPES.ground.wrongCriteria.map(t => ({ text: t, correct: false }))
+    ];
+    renderMultiSelectChallenge(root, {
+      stageKey: 'telescopes',
+      badgeKey: 'telescopes',
+      eyebrow: 'Aşama 3 / 5',
+      challengeTitle: '🔭 Gözlemevi Nereye Kurulmalı?',
+      instruction: 'İyi bir gözlemevi yeri için ÖNEMLİ olan özellikleri işaretle, sonra kontrol et.',
+      items
+    });
+  }
+}
+
+/* ================= AŞAMA 4: Uzay Öncüleri ================= */
+function renderPioneers(root){
+  const sub = state.stageSub.pioneers || 'learn';
+  if(sub === 'learn'){
+    root.innerHTML = `
+      <div class="panel">
+        <div class="eyebrow">Aşama 4 / 5</div>
+        <div class="stage-title">🧑‍🚀 Uzay Öncülerinden İlham Al</div>
+        <p class="stage-lead">Uzay tarihine iz bırakan üç isme göz at, sonra göreve geç.</p>
+        <div class="card-grid" id="pioneer-cards"></div>
+        <div class="aside-note">
+          <div class="an-title">📖 SÖZLÜK</div>
+          ${GLOSSARY.map(g => `<strong>${g[0]}:</strong> ${g[1]}`).join('<br><br>')}
+        </div>
+        <div class="btn-row"><button class="btn" id="to-challenge">Meydan Okumaya Geç ➜</button></div>
+      </div>`;
+    const cardsEl = document.getElementById('pioneer-cards');
+    PIONEERS.forEach(p => {
+      const c = document.createElement('div');
+      c.className = 'info-card';
+      c.innerHTML = `<span class="ic-emoji">${p.emoji}</span><div class="ic-name">${p.name}</div><div class="ic-date">${p.years}</div><div class="ic-def">${p.title}</div>`;
+      c.onclick = () => openInfoModal(`${p.emoji} ${p.name}`, `<p style="font-size:13.5px;line-height:1.6;color:var(--text)">${p.bio}</p>`);
+      cardsEl.appendChild(c);
+    });
+    document.getElementById('to-challenge').onclick = () => { state.stageSub.pioneers = 'challenge'; renderStage(); };
+  } else {
+    if(!state.challengeState.pioneers) state.challengeState.pioneers = { qIndex: 0, correct: 0 };
+    renderSequentialChallenge(root, {
+      stageKey: 'pioneers',
+      badgeKey: 'pioneers',
+      eyebrow: 'Aşama 4 / 5',
+      challengeTitle: '🧑‍🚀 Kim Bu Başarıyı Yaptı?',
+      resultTitle: '🧑‍🚀 Öncüler Değerlendirmesi',
+      questions: PIONEER_QUIZ.map(p => ({ prompt: p.q, options: p.options })),
+      renderOption: (id) => { const p = PIONEERS.find(x => x.id === id); return `${p.emoji} ${p.name}`; }
+    });
+  }
+}
+
+/* ================= AŞAMA 5: Uzay Çöpü ================= */
+function renderDebris(root){
+  const sub = state.stageSub.debris || 'learn';
+  if(sub === 'learn'){
+    root.innerHTML = `
+      <div class="panel">
+        <div class="eyebrow">Aşama 5 / 5</div>
+        <div class="stage-title">♻️ Uzay Çöpü Sorununu Çöz</div>
+        <p class="stage-lead">${SPACE_DEBRIS.intro}</p>
+        <div class="aside-note">
+          <div class="an-title">📡 UZAY GÖZETİM AĞI (SSN)</div>
+          ${SPACE_DEBRIS.stat}
+        </div>
+        <div class="aside-note">
+          <div class="an-title">⚠️ NEDEN TEHLİKELİ?</div>
+          ${SPACE_DEBRIS.danger}
+        </div>
+        <div class="aside-note">
+          <div class="an-title">🚨 YOL AÇABİLECEĞİ SORUNLAR</div>
+          ${SPACE_DEBRIS.problems.join(' · ')}
+        </div>
+        <div class="btn-row"><button class="btn" id="to-challenge">Meydan Okumaya Geç ➜</button></div>
+      </div>`;
+    document.getElementById('to-challenge').onclick = () => { state.stageSub.debris = 'challenge'; renderStage(); };
+  } else {
+    if(!state.challengeState.debris) state.challengeState.debris = {};
+    renderMultiSelectChallenge(root, {
+      stageKey: 'debris',
+      badgeKey: 'debris',
+      eyebrow: 'Aşama 5 / 5',
+      challengeTitle: '♻️ Doğru Çözüm Önerilerini Seç',
+      instruction: 'Uzay çöpü sorununu azaltmaya yönelik DOĞRU çözümleri işaretle, sonra kontrol et.',
+      items: SPACE_DEBRIS.solutions
+    });
+  }
+}
+
+/* ================= FİNAL TEST ================= */
+function renderFinal(root){
+  if(!state.challengeState.final) state.challengeState.final = { qIndex: 0, correct: 0, order: shuffle(FINAL_QUIZ.map((_, i) => i)) };
+  const cs = state.challengeState.final;
+  const total = cs.order.length;
+
+  if(cs.qIndex >= total){
+    const pct = Math.round(cs.correct / total * 100);
+    let msg;
+    if(pct === 100) msg = 'Kusursuz! Tam bir Uzay Görevi Uzmanısın! 🌟';
+    else if(pct >= 70) msg = 'Harika bir performans! 👏';
+    else if(pct >= 40) msg = 'İyi gidiyorsun, sertifikanı almadan önce tekrar deneyebilirsin. 💪';
+    else msg = 'Aşamaları tekrar gözden geçirip yeniden deneyebilirsin. 🚀';
+    root.innerHTML = `
+      <div class="panel">
+        <div class="eyebrow">Final Değerlendirmesi · Sonuç</div>
+        <div class="stage-title">📝 Görev Değerlendirmesi Tamamlandı</div>
+        <div class="quiz-result" style="text-align:center;">
+          <div style="font-size:44px;font-weight:900;color:var(--cyan);font-family:var(--mono);">${cs.correct}/${total}</div>
+          <p style="color:var(--dim);">${msg}</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn secondary" id="retry-btn">🔁 Tekrar Dene</button>
+          <button class="btn" id="cert-btn">🎖️ Sertifikamı Al</button>
+        </div>
+      </div>`;
+    document.getElementById('retry-btn').onclick = () => {
+      state.challengeState.final = { qIndex: 0, correct: 0, order: shuffle(FINAL_QUIZ.map((_, i) => i)) };
+      renderStage();
+    };
+    document.getElementById('cert-btn').onclick = () => {
+      completeStage('final');
+      state.finalScore = { correct: cs.correct, total };
+      navigateTo(state.currentIndex + 1);
+    };
+    return;
+  }
+
+  const q = FINAL_QUIZ[cs.order[cs.qIndex]];
+  root.innerHTML = `
+    <div class="panel">
+      <div class="eyebrow">Final Değerlendirmesi</div>
+      <div class="stage-title">📝 Görev Değerlendirmesi</div>
+      <div class="challenge-box">
+        <div class="challenge-progress">SORU ${cs.qIndex+1} / ${total}</div>
+        <div class="challenge-q">${q.q}</div>
+        <div class="opt-list" id="opt-list"></div>
+      </div>
+    </div>`;
+  const optList = document.getElementById('opt-list');
+  q.options.forEach((opt, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.textContent = opt;
+    b.onclick = () => {
+      const allBtns = [...optList.querySelectorAll('.opt-btn')];
+      allBtns.forEach(x => x.disabled = true);
+      allBtns[q.answer].classList.add('correct');
+      if(i !== q.answer) b.classList.add('wrong'); else cs.correct++;
+      const wrap = document.createElement('div');
+      wrap.className = 'btn-row';
+      const nb = document.createElement('button');
+      nb.className = 'btn';
+      nb.textContent = (cs.qIndex + 1 < total) ? 'Sonraki ➜' : 'Sonucu Gör ➜';
+      nb.onclick = () => { cs.qIndex++; renderStage(); };
+      wrap.appendChild(nb);
+      root.querySelector('.panel').appendChild(wrap);
+    };
+    optList.appendChild(b);
+  });
+}
+
+/* ================= SERTİFİKA ================= */
+const PASS_THRESHOLD_PCT = 50;
+
+function renderCertificate(root){
+  const score = state.finalScore || { correct: 0, total: FINAL_QUIZ.length };
+  const finalPct = score.total ? Math.round(score.correct / score.total * 100) : 0;
+  const passed = finalPct >= PASS_THRESHOLD_PCT;
+
+  root.innerHTML = `
+    <div class="panel cert-wrap no-print-outer">
+      <div class="eyebrow">${passed ? 'Görev Tamamlandı' : 'Değerlendirme Tamamlandı'}</div>
+      <div class="stage-title" style="justify-content:center;">${passed ? '🎖️ Uzay Uzmanlığı Sertifikan Hazır' : '📋 Görev Değerlendirme Raporun Hazır'}</div>
+      <p class="stage-lead">${passed
+        ? 'Adını yaz, sertifikan aşağıda oluşsun.'
+        : `Final değerlendirmesinde %${PASS_THRESHOLD_PCT} ve üzeri alarak "Uzay Uzmanlığı Sertifikası"nı kazanabilirsin. Aşağıdaki raporda hangi aşamaları tekrar gözden geçirmen gerektiğini görebilir, sonra final testini yeniden deneyebilirsin.`}</p>
+      <input type="text" id="cert-name" class="cert-input" placeholder="Adını buraya yaz..." maxlength="40" />
+      <div class="certificate ${passed ? '' : 'not-passed'}" id="certificate">
+        <div class="cert-eyebrow">TÜRKİYE UZAY AJANSI · GÖREV UZMANI ADAYLIĞI PROGRAMI</div>
+        <h2>${passed ? '🎖️ Uzay Uzmanlığı Sertifikası' : '📋 Görev Değerlendirme Raporu'}</h2>
+        <div class="cert-name" id="cert-name-display">Uzman Adayı</div>
+        <p class="cert-line">${passed
+          ? 'bu belge ile "Uzay Görevi"nin tüm aşamalarını başarıyla tamamlayarak<br>uzay araçlarını, Türkiye\'nin uydu filosunu, gözlem ağını, uzay öncülerini<br>ve uzay çöpü sorununu öğrendiğini kanıtlamıştır.'
+          : `"Uzay Görevi"nin tüm aşamalarını tamamladı, ancak final değerlendirmesinde %${PASS_THRESHOLD_PCT}'nin altında kaldığı için henüz "Uzman Adayı" unvanını kazanamadı.<br>Aşağıdaki dereceler hangi aşamaların tekrar çalışılması gerektiğini gösteriyor.`}</p>
+        <div class="badge-row" id="cert-badges"></div>
+        <div class="cert-tier-note">🥇 Altın Derece: %100 doğru · 🥈 Gümüş Derece: %70-99 · 🥉 Bronz Derece: %50-69 · 🔻 Geliştirilmeli: %50'nin altı — hangi aşamada eksik kaldığını buradan görebilirsin.</div>
+        <div class="cert-score">Final Değerlendirmesi: ${score.correct}/${score.total} (%${finalPct})</div>
+        <div class="cert-line" style="margin-top:14px;font-size:12px;" id="cert-date"></div>
+      </div>
+      <div class="btn-row no-print">
+        <button class="btn secondary" id="restart-btn">🔄 Baştan Başla</button>
+        ${passed
+          ? '<button class="btn" id="print-btn">🖨️ Sertifikayı Yazdır</button>'
+          : '<button class="btn" id="retry-final-btn">📝 Final Testini Tekrar Dene</button>'}
+      </div>
+    </div>`;
+
+  const nameInput = document.getElementById('cert-name');
+  const nameDisplay = document.getElementById('cert-name-display');
+  nameInput.value = state.studentName;
+  nameDisplay.textContent = state.studentName || 'Uzman Adayı';
+  nameInput.addEventListener('input', () => {
+    state.studentName = nameInput.value.trim();
+    nameDisplay.textContent = state.studentName || 'Uzman Adayı';
+  });
+
+  const badgesEl = document.getElementById('cert-badges');
+  Object.entries(BADGES).forEach(([key, b]) => {
+    const score = getStageScore(key);
+    const tier = getRankTier(score);
+    const p = document.createElement('div');
+    p.className = 'badge-pill tier-' + tier.key;
+    const scoreLine = score.total ? `${score.correct}/${score.total} doğru · %${tier.pct}` : '';
+    p.innerHTML = `
+      <span class="bp-emoji">${b.emoji}</span>
+      <div class="bp-name">${b.name}</div>
+      <div class="bp-tier">${tier.emoji} ${tier.label}</div>
+      <div class="bp-score">${scoreLine}</div>`;
+    badgesEl.appendChild(p);
+  });
+
+  document.getElementById('cert-date').textContent = new Date().toLocaleDateString('tr-TR', { year:'numeric', month:'long', day:'numeric' });
+
+  if(passed){
+    document.getElementById('print-btn').onclick = () => window.print();
+  } else {
+    document.getElementById('retry-final-btn').onclick = () => {
+      state.challengeState.final = { qIndex: 0, correct: 0, order: shuffle(FINAL_QUIZ.map((_, i) => i)) };
+      navigateTo(STAGES.findIndex(s => s.key === 'final'));
+    };
+  }
+  document.getElementById('restart-btn').onclick = () => {
+    if(!confirm('Görev baştan başlatılsın mı? Tüm ilerleme sıfırlanacak.')) return;
+    Object.assign(state, {
+      currentIndex: 0, unlockedIndex: 0, completed: {}, stageSub: {}, challengeState: {}, stageScore: {}, studentName: ''
+    });
+    navigateTo(0);
+  };
+}
+
+/* ================= Yönlendirici ================= */
+function renderStage(){
+  const root = document.getElementById('stage-root');
+  const key = STAGES[state.currentIndex].key;
+  if(key === 'brief') renderBrief(root);
+  else if(key === 'vehicles') renderVehicles(root);
+  else if(key === 'satellites') renderSatellites(root);
+  else if(key === 'telescopes') renderTelescopes(root);
+  else if(key === 'pioneers') renderPioneers(root);
+  else if(key === 'debris') renderDebris(root);
+  else if(key === 'final') renderFinal(root);
+  else if(key === 'cert') renderCertificate(root);
+}
+
+/* ================= Başlangıç ================= */
+document.addEventListener('DOMContentLoaded', () => {
+  wireModal();
+  renderRail();
+  renderStage();
+});
+
+</script>
+</body>
+</html>
